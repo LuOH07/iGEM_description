@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSidebarPosition();
     }
 
-    const headings = mainContainer.querySelectorAll('h1.heading-1, h2.heading-2, h3.heading-3');
+    const headings = mainContainer.querySelectorAll('h1.heading-1, h2.heading-2, h3.heading-3, h1.heading-reference');
     if (headings.length === 0) return;
 
     tocNav.innerHTML = '';
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let h1Index = 0;
     let h2Index = 0;
     let h3Index = 0;
+    let refIndex = 0;
 
     const activeChainMap = {};
     let currentH1Id = null;
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isH1 = heading.matches('h1.heading-1');
         const isH2 = heading.matches('h2.heading-2');
         const isH3 = heading.matches('h3.heading-3');
+        const isRef = heading.matches('h1.heading-reference');
 
         if (!heading.id) {
             if (isH1) {
@@ -54,10 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (isH3) {
                 h3Index++;
                 heading.id = `heading-3-${h3Index}`;
+            } else if (isRef) {
+                refIndex++;
+                heading.id = `heading-reference-${refIndex}`;
             }
         }
 
-        if (isH1) {
+        if (isH1 || isRef) {
             currentH1Id = heading.id;
             currentH2Id = null;
             activeChainMap[heading.id] = [heading.id];
@@ -73,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const tocItem = document.createElement('a');
-        if (isH1) {
+        if (isH1 || isRef) {
             tocItem.className = 'toc-item toc-item-h1';
         } else if (isH2) {
             tocItem.className = 'toc-item toc-item-h2';
@@ -84,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tocItem.setAttribute('data-target', heading.id);
         tocItem.title = heading.textContent.trim();
 
-        if (isH1) {
+        if (isH1 || isRef) {
             const circle = document.createElement('span');
             circle.className = 'toc-circle';
             circle.setAttribute('aria-hidden', 'true');
@@ -125,11 +130,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (history.pushState) {
                     history.pushState(null, '', `#${heading.id}`);
                 }
+                centerTocItemInSidebar(tocItem);
             }
         });
 
         tocNav.appendChild(tocItem);
     });
+
+    const centerTocItemInSidebar = (item) => {
+        if (!sideContainer || !item) return;
+        const containerRect = sideContainer.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+        const itemCenterOffset = (itemRect.top - containerRect.top) + (itemRect.height / 2);
+        const containerCenter = containerRect.height / 2;
+        const targetScrollTop = sideContainer.scrollTop + (itemCenterOffset - containerCenter);
+
+        sideContainer.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior: 'smooth'
+        });
+    };
+
+    let lastActiveId = null;
 
     const updateActiveToc = () => {
         const triggerPoint = window.innerHeight * 0.25;
@@ -166,6 +188,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.remove('active');
             }
         });
+
+        if (currentHeading && currentHeading.id !== lastActiveId) {
+            lastActiveId = currentHeading.id;
+            const activeItem = tocNav.querySelector(`.toc-item[data-target="${currentHeading.id}"]`);
+            if (activeItem) {
+                centerTocItemInSidebar(activeItem);
+            }
+        } else if (!currentHeading && lastActiveId !== null) {
+            lastActiveId = null;
+            if (sideContainer) {
+                sideContainer.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
     };
 
     window.addEventListener('scroll', updateActiveToc, { passive: true });
@@ -242,14 +280,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (backToTop) {
             const scabbardRect = scabbard.getBoundingClientRect();
-            // 计算剑鞘的垂直中心点，使 backToTop 的中心与其对齐
             const scabbardCenterY = scabbardRect.top + scabbardRect.height / 2;
             backToTop.style.top = `${scabbardCenterY}px`;
             backToTop.style.transform = 'translateY(-50%)';
 
             if (scabbardRect.width > 0 && scabbardRect.left > 0) {
-                // 原位置在剑鞘左侧 10px，现向右移动 3% 视口宽度 (3vw)
-                const offsetRight = window.innerWidth - scabbardRect.left -3;
+                const offsetRight = window.innerWidth - scabbardRect.left - 3;
                 backToTop.style.right = `${offsetRight}px`;
             }
         }
