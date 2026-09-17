@@ -464,5 +464,5 @@ transition: filter 0.2s ease;
 }
 
 .scroll-back-to-top:hover {
-filter: drop-shadow(0 0 6px rgba(250, 225, 92, 0.6));
+filter: drop-shadow(0 0 6px rgba(136, 216, 177, 0.6));
 }
