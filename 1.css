@@ -16,8 +16,8 @@ font-display: swap;
 }
 
 @font-face {
-font-family: 'opensans semicondensed bold';
-src: url('https://static.igem.wiki/teams/6059/wiki/font/opensans-semicondensed-bold.ttf') format('truetype');
+font-family: 'opensans semicondensed light';
+src: url('https://static.igem.wiki/teams/6059/wiki/font/opensans-semicondensed-light.ttf') format('truetype');
 font-weight: normal;
 font-style: normal;
 font-display: swap;
@@ -389,10 +389,10 @@ clip-path: polygon(
 
 
 .body-text {
-font-family: 'opensans semicondensed bold', -apple-system, sans-serif;
+font-family: 'opensans semicondensed light', -apple-system, sans-serif;
 font-stretch: semi-condensed;
 font-size: 22px;
-letter-spacing: 0px;
+letter-spacing: 0.5px;
 line-height: 1.6;
 color: #000000;
 margin-left: 8%;
